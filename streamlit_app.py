@@ -140,6 +140,7 @@ def save_rendered_html(html_content, filename):
         file.write(html_content)
 
 def lr_classifi(image_path):
+    print(image_path)
     image = cv2.imread(image_path)
     # Get the dimensions of the original image
     height, width, _ = image.shape
@@ -192,7 +193,7 @@ def lr_classifi(image_path):
         # Display the result
         # cv2.imshow('Result', image)
         # print(f"The blue dot is to the {position} of the center of the original image.")
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
         cv2.destroyAllWindows()
     return position
 def open_html_file(url_path):
@@ -310,7 +311,8 @@ def uploaded_file_detect(uploaded_files, save_location):
 
 
     for uploaded_file in uploaded_files:
-        lr_data = lr_classifi(str('./data/' + save_location + '/' + uploaded_file.name))
+        current_path = os.getcwd()
+        lr_data = lr_classifi(current_path+str('./data/' + save_location + '/' + uploaded_file.name))
         label = classify_image(uploaded_file)
         if lr_data == '좌안' or lr_data == '불명':
             left_data = ['./data/' + save_location + '/' + uploaded_file.name,
@@ -358,6 +360,7 @@ def open_past_html(file_path):
 def main():
 
     createfolder('./data')
+    current_path = os.getcwd()
     if "logged_in" not in session_state:
         session_state["logged_in"] = False
     if session_state["logged_in"]:
