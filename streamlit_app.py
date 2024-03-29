@@ -1,13 +1,10 @@
 import streamlit as st
-# from streamlit.cli import main
 from streamlit import session_state
 from tensorflow.keras.models import load_model
 from PIL import Image
 import numpy as np
-import datetime
 import os
-import re
-import base64
+import cv2
 import webbrowser
 from lr_classification import lr_classifi
 from make_html import save_rendered_html, render_html_template
