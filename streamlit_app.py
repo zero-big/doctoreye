@@ -192,7 +192,7 @@ def lr_classifi(image_path):
         # Display the result
         # cv2.imshow('Result', image)
         # print(f"The blue dot is to the {position} of the center of the original image.")
-        cv2.waitKey(0)
+        cv2.waitKey(1)
         cv2.destroyAllWindows()
     return position
 def open_html_file(url_path):
