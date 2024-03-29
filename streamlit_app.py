@@ -193,9 +193,10 @@ def lr_classifi(image_path):
         # Display the result
         # cv2.imshow('Result', image)
         # print(f"The blue dot is to the {position} of the center of the original image.")
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
     return position
+
 def open_html_file(url_path):
     current_path = os.getcwd()
     try:
@@ -311,6 +312,7 @@ def uploaded_file_detect(uploaded_files, save_location):
     current_path = os.getcwd()
     for uploaded_file in uploaded_files:
         lr_data = lr_classifi(current_path+str('/data/' + save_location + '/' + uploaded_file.name))
+        print(lr_data)
         label = classify_image(uploaded_file)
         if lr_data == '좌안' or lr_data == '불명':
             left_data = ['./data/' + save_location + '/' + uploaded_file.name,
