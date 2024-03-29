@@ -6,11 +6,195 @@ import numpy as np
 import os
 import cv2
 import webbrowser
-from lr_classification import lr_classifi
-from make_html import save_rendered_html, render_html_template
 import datetime
 
 
+def render_html_template(variables):
+    # Define your HTML template with placeholders for variables
+    html_template = """
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>판독 결과지</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+            body {
+                font-family: 'Noto Sans KR', sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container mx-auto px-4 py-8">
+            <div class="border-b-4 border-blue-800 pb-4">
+                <div class="flex justify-between items-center">
+                 <img src="../../name_logo.jpg" alt="Mediwhale logo placeholder" class="h-12 float-left mr-4"> 
+                <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    프린터
+                </button>
+            </div>
+
+                <div class="mt-4">
+                    <div class="flex justify-between">
+                        <div>
+                            <span class="font-bold">환자 이름:</span> {{ name }}
+                        </div>
+                        <div>
+                            <span class="font-bold">나이:</span> {{ age }}
+                        </div>
+                        <div>
+                            <span class="font-bold">성별:</span> {{ sex }}
+                        </div>
+                        <div>
+                            <span class="font-bold">검사일자:</span> {{ date }}
+                        </div>
+                        <div>
+                            <span class="font-bold">시간:</span> {{ time }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                    <h2 class="text-center font-bold mb-2">좌안</h2>
+                    <img src={{ left_img_path }} alt="Right eye fundus image placeholder" class="w-full" />
+                </div>
+                <div>
+                    <h2 class="text-center font-bold mb-2">우안</h2>
+                    <img src={{ right_img_path }} alt="Left eye fundus image placeholder" class="w-full" />
+                </div>
+            </div>
+            <div class="mt-8">
+                <table class="w-full text-center">
+                    <thead>
+                        <tr>
+                            <th class="bg-blue-300 text-black p-2">안저 방향</th>
+                            <th class="bg-blue-400 text-black p-2" colspan="4">판독결과</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="bg-blue-400 border border-blue-400 text-black p-2" rowspan="2">좌안</td>
+                            <td class="bg-gray-300 border-blue-200 text-black p-2">당뇨망막병증</td>
+                            <td class="bg-gray-300 border-blue-200 text-black p-2">황반변성</td>
+                            <td class="bg-gray-300 border-blue-200 text-black p-2">녹내장</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-blue-200 text-black p-2">{{ left_data_value[0] }}</td>
+                            <td class="border border-blue-200 text-black p-2">{{ left_data_value[1] }}</td>
+                            <td class="border border-blue-200 text-black p-2">{{ left_data_value[2] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="bg-blue-200 border-blue-400 text-black p-2" rowspan="2">우안</td>
+                            <td class="bg-gray-300 border-blue-200 text-black p-2">당뇨망막병증</td>
+                            <td class="bg-gray-300 border-blue-200 text-black p-2">황반변성</td>
+                            <td class="bg-gray-300 border-blue-200 text-black p-2">녹내장</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-blue-200 text-black p-2">{{ right_data_value[0] }}</td>
+                            <td class="border border-blue-200 text-black p-2">{{ right_data_value[1] }}</td>
+                            <td class="border border-blue-200 text-black p-2">{{ right_data_value[2] }}</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 20px; margin-bottom: 20px;">
+                <hr style="border: 5px solid #cee6ec;">
+            </div>
+            <table style="width: 100%; margin-left: auto; margin-right: auto;">
+                <tr>
+                    <td colspan="2" style="text-align: center;">
+                        <div class="mt-4">
+                            <p class="text-lg" style="font-size: 27px;">권고사항</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: left; font-size: 20px"><div class="mt-12"><p class="text-md">
+                    본 진단은 안저 영상 검사 결과와 안저영상의학의 의사들이 분석한 결과입니다.                    여기서 언급된 결과들은 의사의 전문적인 의학적인 상태를 지칭한 것은 아니며
+                    실제로 환자의 건강 상태를 진단하는데 사용될 수 없습니다.                    본 결과는 단지 안저 영상 검사 결과를 기반으로 한 의학적인 정보를 바탕으로
+                    환자의 상태를 파악하는데 도움을 줄 수 있는 참고용으로만 사용하시길 바랍니다.
+                    출처를 밝히지 않습니다.</p></div></td>
+                </tr>
+            </table>
+            <div style="margin-top: 20px; margin-bottom: 20px;">
+                <hr style="border: 5px solid #cee6ec;">
+            </div>
+
+        </div>
+    </body>
+    </html>
+    """
+    # Create a Jinja2 template object
+    template = Template(html_template)
+    # Render the template with variables
+    rendered_html = template.render(variables)
+    return rendered_html
+
+
+def save_rendered_html(html_content, filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        file.write(html_content)
+
+def lr_classifi(image_path):
+    image = cv2.imread(image_path)
+    # Get the dimensions of the original image
+    height, width, _ = image.shape
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Apply Gaussian blur to reduce noise
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    # Perform edge detection using Canny
+    edges = cv2.Canny(blurred, 50, 150)
+    # Find contours in the edge-detected image
+    contours, _ = cv2.findContours(edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Initialize variables to store the brightest point and its brightness
+    brightest_point = None
+    max_brightness = 0
+    # Loop over the contours
+    for contour in contours:
+        # Approximate the contour to reduce the number of points
+        approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
+        # Check if the contour is approximately circular
+        if len(approx) >= 8:
+            # Compute the bounding box of the contour
+            (x, y, w, h) = cv2.boundingRect(contour)
+            # Crop the circular region
+            mask = np.zeros_like(gray)
+            cv2.drawContours(mask, [contour], 0, 255, -1)
+            masked_gray = np.where(mask == 255, gray, 0)
+            # Find the brightest point within the circular region
+            (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(masked_gray)
+            # Update the brightest point and its brightness if necessary
+            if maxVal > max_brightness:
+                brightest_point = maxLoc
+                max_brightness = maxVal
+# If no circular contours were found, skip further processing
+    if brightest_point is None:
+        position = "불명"
+    else:
+        # Draw a circle around the brightest point
+        cv2.circle(image, brightest_point, 5, (255, 0, 0), 2)
+        # Calculate the center of the original image
+        center_x = width // 2
+        # Determine if the blue dot is to the left or right of the center
+        if brightest_point[0] < center_x:
+            position = "좌안"
+        elif brightest_point[0] > center_x:
+            position = "우안"
+        else:
+            position = "불명"
+
+
+        # Display the result
+        # cv2.imshow('Result', image)
+        # print(f"The blue dot is to the {position} of the center of the original image.")
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    return position
 def open_html_file(url_path):
     current_path = os.getcwd()
     try:
