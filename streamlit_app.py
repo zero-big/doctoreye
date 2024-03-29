@@ -308,10 +308,9 @@ def past_data(selected_option, folder_path):
 def uploaded_file_detect(uploaded_files, save_location):
     col1, col2 = st.columns(2)
     print('iojboifgkbpogfkbpogfkbpofgkbpogfkbpogfkbpfgokbpgfob')
-
-
+    current_path = os.getcwd()
     for uploaded_file in uploaded_files:
-        lr_data = lr_classifi(str('./data/' + save_location + '/' + uploaded_file.name))
+        lr_data = lr_classifi(current_path+str('./data/' + save_location + '/' + uploaded_file.name))
         label = classify_image(uploaded_file)
         if lr_data == '좌안' or lr_data == '불명':
             left_data = ['./data/' + save_location + '/' + uploaded_file.name,
