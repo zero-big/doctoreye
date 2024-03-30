@@ -233,11 +233,9 @@ def data_list(name_tag):
     return data_value
 
 # 모델 로드
-current_path = os.getcwd()
-print(current_path+'/'+"total_dataset_weight_2.h5")
 
 model = load_model("./total_dataset_weight_2.h5")
-model = load_model(current_path+'/'+"total_dataset_weight_2.h5")
+
 # print(current_path+'/'+"total_dataset_weight_2.h5")
 
 def classify_image(image, load_open= None):
