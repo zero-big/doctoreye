@@ -268,11 +268,10 @@ def createfolder(folder_path):
         print("Error: Failed to create the directory.")
 
 def past_data(selected_option, folder_path):
-
+    current_path = os.getcwd()
     image_folder_path = './data/' + folder_path
-
     if st.button("결과지 출력") and folder_path != '':
-        current_path = os.getcwd()
+        # current_path = os.getcwd()
         open_past_html(current_path+'/' +image_folder_path+'/'+folder_path+'.html')
 
     if folder_path != '':
