@@ -34,11 +34,17 @@ def render_html_template(variables):
                     프린터
                 </button>
             </div>
-
+            <br>
+            <div class="border-b-4 border-blue-800 pb-4">
+                <span class="font-bold">DoctorEye</span>는 서울대학교 교수진이 직접 설계한 AI 알고리즘에 50만 장의 망막 사진을 학습시킨 인공지능 프로그램입니다.<br>
+                안저 카메라에서 촬영한 안저 이미지를 DoctorEye를 통해 분석합니다.<br>
+                한번에 3가지 질병을 진단 할 수 있어 편리하며 보다 빠르고 정확한 분석이 가능합니다.<br>
+                질병을 초기에 진단하는 인공지능 헬스케어 솔루션입니다.
+            </div>
                 <div class="mt-4">
                     <div class="flex justify-between">
                         <div>
-                            <span class="font-bold">환자 이름:</span> {{ name }}
+                            <span class="font-bold">이름:</span> {{ name }}
                         </div>
                         <div>
                             <span class="font-bold">나이:</span> {{ age }}
@@ -47,7 +53,7 @@ def render_html_template(variables):
                             <span class="font-bold">성별:</span> {{ sex }}
                         </div>
                         <div>
-                            <span class="font-bold">검사일자:</span> {{ date }}
+                            <span class="font-bold">일자:</span> {{ date }}
                         </div>
                         <div>
                             <span class="font-bold">시간:</span> {{ time }}
@@ -55,17 +61,33 @@ def render_html_template(variables):
                     </div>
                 </div>
             </div>
-
-            <div class="grid grid-cols-2 gap-4 mt-4">
+            <div class="grid grid-cols-4 gap-2 mt-4">
+                <div class="flex justify-center items-center">
                 <div>
                     <h2 class="text-center font-bold mb-2">좌안</h2>
-                    <img src=data:image/png;base64,{{ left_img_path }} alt="Right eye fundus image placeholder" class="w-full" />
+                    <img src=data:image/png;base64,{{ normal_left_path }}  alt="Right eye fundus image placeholder" class="w-120 h-120 place-content-center" />
+                </div>
+                </div>
+                                <div class="flex justify-center items-center">
+                <div>
+                    <h2 class="text-center font-bold mb-2">우안</h2>
+                     <img src=data:image/png;base64,{{ normal_right_path }} alt="Left eye fundus image placeholder" class="w-120 h-120 place-content-center" />
+                </div>
+                </div>
+                <div>
+                    <h2 class="text-center font-bold mb-2">좌안</h2>
+                    <img src=data:image/png;base64,{{ left_img_path }} alt="Left eye fundus image placeholder" class="w-120 h-120 place-content-center"  />
                 </div>
                 <div>
                     <h2 class="text-center font-bold mb-2">우안</h2>
-                     <img src=data:image/png;base64,{{ right_img_path }} alt="Left eye fundus image placeholder" class="w-full" />
+                     <img src=data:image/png;base64,{{ right_img_path }} alt="Right eye fundus image placeholder" class="w-120 h-120 place-content-center"  />
                 </div>
             </div>
+            <div class="border-b-4 border-blue-800 pb-4 grid grid-cols-2 gap-4 mt-4">
+                <h2 class="text-center font-bold mb-2" style="font-size: 22px;">정상 안저이미지</h2>
+                <h2 class="text-center font-bold mb-2" style="font-size: 22px;">환자 안저이미지</h2>
+            </div>
+ 
             <div class="mt-8">
                 <table class="w-full text-center">
                     <thead>
@@ -76,7 +98,7 @@ def render_html_template(variables):
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="bg-blue-400 border border-blue-400 text-black p-2" rowspan="2">좌안</td>
+                            <td class="bg-blue-400 border-blue-400 text-black p-2" rowspan="2">좌안</td>
                             <td class="bg-gray-300 border-blue-200 text-black p-2">당뇨망막병증</td>
                             <td class="bg-gray-300 border-blue-200 text-black p-2">황반변성</td>
                             <td class="bg-gray-300 border-blue-200 text-black p-2">녹내장</td>
@@ -101,11 +123,35 @@ def render_html_template(variables):
                     </tbody>
                 </table>
             </div>
+            <div style='page-break-before:always'></div>
             <div style="margin-top: 20px; margin-bottom: 20px;">
                 <hr style="border: 5px solid #cee6ec;">
             </div>
             <table style="width: 100%; margin-left: auto; margin-right: auto;">
                 <tr>
+                    <div class="border-b-4 border-blue-800 pb-4">
+                    <td colspan="2" style="text-align: center;"><br>
+                            <p class="text-lg" style="font-size: 27px;">판독소견</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-size: 20px"><div class="mt-8"><p class="text-md">
+                        DoctorEye 인공지능을 이용한 판독 결과,<br>
+                        귀하의 오른쪽 안저사진에서 <span style="color:blue" class="font-bold">{{right_label}}</span> 이 의심 됩니다.<br>
+                        귀하의 왼쪽 안저사진에서 <span style="color:blue" class="font-bold">{{left_label}}</span> 이 의심 됩니다.
+                    </div></td>
+                    </tr>
+                <tr>
+                    <td colspan="4" style="text-align: center; font-size: 20px"><div class="mt-12"><p class="text-md">
+                        조속한 시일 내에 정확한 진단과 추가적인 검사 및 꾸준한 치료를 위해 가까운 안과에 방문하셔서 안과 전문의에게 검진 받으시기를 권고 드립니다.<br>
+                        감사합니다.
+                    </div></td>
+                </tr>
+            </table>
+            <table style="width: 100%; margin-left: auto; margin-right: auto;">
+                <tr>
+                <div class="border-b-4 border-blue-800 pb-4">
                     <td colspan="2" style="text-align: center;">
                         <div class="mt-4">
                             <p class="text-lg" style="font-size: 27px;">권고사항</p>
@@ -114,10 +160,10 @@ def render_html_template(variables):
                 </tr>
                 <tr>
                     <td colspan="4" style="text-align: left; font-size: 20px"><div class="mt-12"><p class="text-md">
-                    본 진단은 안저 영상 검사 결과와 안저영상의학의 의사들이 분석한 결과입니다.                    여기서 언급된 결과들은 의사의 전문적인 의학적인 상태를 지칭한 것은 아니며
-                    실제로 환자의 건강 상태를 진단하는데 사용될 수 없습니다.                    본 결과는 단지 안저 영상 검사 결과를 기반으로 한 의학적인 정보를 바탕으로
+                    본 진단은 50만장의 안저 사진을 학습 한 AI알고리즘이 분석한 결과입니다.
+                    본 결과는 단지 안저 영상 검사 결과를 기반으로 한 의학적인 정보를 바탕으로
                     환자의 상태를 파악하는데 도움을 줄 수 있는 참고용으로만 사용하시길 바랍니다.
-                    출처를 밝히지 않습니다.</p></div></td>
+                    </p></div></td>
                 </tr>
             </table>
             <div style="margin-top: 20px; margin-bottom: 20px;">
@@ -280,11 +326,11 @@ def createfolder(folder_path):
 
 def past_data(selected_option, folder_path):
     current_path = os.getcwd()
-    image_folder_path = './data/' + folder_path
-
-    if st.button("결과지 출력") and folder_path != '':
-        # current_path = os.getcwd()
-        open_past_html(current_path+'/' +image_folder_path+'/'+folder_path+'.html')
+    image_folder_path = 'data/' + folder_path
+    #
+    # if st.button("결과지 출력") and folder_path != '':
+    #     # current_path = os.getcwd()
+    #     open_past_html(current_path+'/' +image_folder_path+'/'+folder_path+'.html')
 
     if folder_path != '':
         image_files = [f for f in os.listdir(image_folder_path) if
@@ -320,6 +366,14 @@ def past_data(selected_option, folder_path):
         html_string = f.read()
     # Streamlit 앱에 HTML 렌더링
     st.components.v1.html(html_string, height=1200, scrolling=True)
+
+def load_img_base(url):
+    current_path = os.getcwd()
+    print(current_path+url)
+    with open(current_path + url, "rb") as img_file:
+        bytes = img_file.read()
+    img_base64 = base64.b64encode(bytes).decode()
+    return img_base64
 def uploaded_file_detect(uploaded_files, save_location):
     col1, col2 = st.columns(2)
     current_path = os.getcwd()
@@ -336,9 +390,9 @@ def uploaded_file_detect(uploaded_files, save_location):
                          label[1] * 100,
                          data_list(label_change(label[0])),
                          uploaded_file.name]
-            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
-                img_bytes = img_file.read()
-            left_img_base64 = base64.b64encode(img_bytes).decode()
+            # with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+            #     img_bytes = img_file.read()
+            # left_img_base64 = base64.b64encode(img_bytes).decode()
         else:
             with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
                 img_bytes = img_file.read()
@@ -352,22 +406,37 @@ def uploaded_file_detect(uploaded_files, save_location):
     left_side, right_side = save_location.split('_')
     date_value = left_side[0:4] + '년' + left_side[4:6] + '월' + left_side[6:8] + '일'
     time_value = right_side[0:2] + '시' + right_side[2:4] + '분' + right_side[4:6] + '초'
-    print('11111111',current_path+'\logo.png')
-    print(type(current_path +"""/""" + 'logo.png'))
-    print("C:\\Users\\user\\PycharmProjects\\doctoreye_3\\logo.png")
-    with open(current_path + "/name_logo.jpg", "rb") as img_file:
-        logo_bytes = img_file.read()
-    logo_path = base64.b64encode(logo_bytes).decode()
+    # print('11111111',current_path+'\logo.png')
+    # print(type(current_path +"""/""" + 'logo.png'))
+    # print("C:\\Users\\user\\PycharmProjects\\doctoreye_3\\logo.png")
+    logo_path = load_img_base("/name_logo.jpg")
+    # with open(current_path + "/name_logo.jpg", "rb") as img_file:
+    #     logo_bytes = img_file.read()
+    # logo_path = base64.b64encode(logo_bytes).decode()
+
+    # with open(current_path + "/normal_left.jpg", "rb") as img_file:
+    #     normal_left_bytes = img_file.read()
+    # normal_left = base64.b64encode(normal_left_bytes).decode()
+    normal_left = load_img_base("/normal_left.jpg")
+    normal_right= load_img_base("/normal_right.jpg")
+    # with open(current_path + "/normal_right.jpg", "rb") as img_file:
+    #     normal_right_bytes = img_file.read()
+    # normal_right = base64.b64encode(normal_right_bytes).decode()
     variables = {'name': '홍길동',
-                 'age': 0,
+                 'age': str(72)+"세",
                  'date': date_value,
                  'time': time_value,
-                 'sex': "man",
+                 'sex': "남",
                  'left_img_path': left_img_base64,
+                 'left_label':left_data[1],
                  'left_data_value': left_data[3],
                  'right_img_path': right_img_base64,
+                 'right_label': right_data[1],
                  'right_data_value': right_data[3],
-                 'logo_img_path': logo_path}
+                 'logo_img_path': logo_path,
+                 'normal_left_path': normal_left,
+                 'normal_right_path': normal_right,
+                 }
     html_content = render_html_template(variables)
 
     save_rendered_html(html_content, str('./data/' + save_location + '/' + f'{save_location}.html'))
