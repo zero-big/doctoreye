@@ -8,7 +8,7 @@ import cv2
 import webbrowser
 import datetime
 from jinja2 import Template
-
+import base64
 def render_html_template(variables):
     # Define your HTML template with placeholders for variables
     html_template = """
@@ -29,7 +29,7 @@ def render_html_template(variables):
         <div class="container mx-auto px-4 py-8">
             <div class="border-b-4 border-blue-800 pb-4">
                 <div class="flex justify-between items-center">
-                 <img src="../../name_logo.jpg" alt="Mediwhale logo placeholder" class="h-12 float-left mr-4"> 
+                 <img src=data:image/png;base64,{{ logo_img_path }} alt="Mediwhale logo placeholder" class="h-12 float-left mr-4"> 
                 <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     프린터
                 </button>
@@ -59,11 +59,11 @@ def render_html_template(variables):
             <div class="grid grid-cols-2 gap-4 mt-4">
                 <div>
                     <h2 class="text-center font-bold mb-2">좌안</h2>
-                    <img src={{ left_img_path }} alt="Right eye fundus image placeholder" class="w-full" />
+                    <img src=data:image/png;base64,{{ left_img_path }} alt="Right eye fundus image placeholder" class="w-full" />
                 </div>
                 <div>
                     <h2 class="text-center font-bold mb-2">우안</h2>
-                    <img src={{ right_img_path }} alt="Left eye fundus image placeholder" class="w-full" />
+                     <img src=data:image/png;base64,{{ right_img_path }} alt="Left eye fundus image placeholder" class="w-full" />
                 </div>
             </div>
             <div class="mt-8">
@@ -197,10 +197,18 @@ def lr_classifi(image_path):
         # cv2.destroyAllWindows()
     return position
 
+import streamlit.components.v1 as components
 def open_html_file(url_path):
     current_path = os.getcwd()
+    print(current_path+url_path)
     try:
         if os.path.exists(current_path+url_path):
+            html_url = current_path+url_path
+            print(html_url)
+            print(type(html_url))
+            p = open(current_path+url_path)
+            components.html(p.read())
+            print("pppppppppppppppppppppppppppp")
             webbrowser.open(current_path+url_path)
         else:
             st.write('"결과지를 작성중입니다. 잠시만 기다려주세요.')
@@ -273,6 +281,7 @@ def createfolder(folder_path):
 def past_data(selected_option, folder_path):
     current_path = os.getcwd()
     image_folder_path = './data/' + folder_path
+
     if st.button("결과지 출력") and folder_path != '':
         # current_path = os.getcwd()
         open_past_html(current_path+'/' +image_folder_path+'/'+folder_path+'.html')
@@ -307,22 +316,33 @@ def past_data(selected_option, folder_path):
             print('불러낸 이미지', image_files[0])
             label2 = classify_image(image_path)
             st.write('분류 결과 : %s (%.2f%%) ' % (label_change(label2[0]), label2[1] * 100))
-
+    with open(current_path+'/' +image_folder_path+'/'+folder_path+'.html', 'r', encoding='utf8') as f:
+        html_string = f.read()
+    # Streamlit 앱에 HTML 렌더링
+    st.components.v1.html(html_string, height=1200, scrolling=True)
 def uploaded_file_detect(uploaded_files, save_location):
     col1, col2 = st.columns(2)
-    print('iojboifgkbpogfkbpogfkbpofgkbpogfkbpogfkbpfgokbpgfob')
     current_path = os.getcwd()
     for uploaded_file in uploaded_files:
         lr_data = lr_classifi(current_path+str('/data/' + save_location + '/' + uploaded_file.name))
         print(lr_data)
         label = classify_image(uploaded_file)
         if lr_data == '좌안' or lr_data == '불명':
+            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+                img_bytes = img_file.read()
+            left_img_base64 = base64.b64encode(img_bytes).decode()
             left_data = ['./data/' + save_location + '/' + uploaded_file.name,
                          label_change(label[0]),
                          label[1] * 100,
                          data_list(label_change(label[0])),
                          uploaded_file.name]
+            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+                img_bytes = img_file.read()
+            left_img_base64 = base64.b64encode(img_bytes).decode()
         else:
+            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+                img_bytes = img_file.read()
+            right_img_base64 = base64.b64encode(img_bytes).decode()
             right_data = ['./data/' + save_location + '/' + uploaded_file.name,
                           label_change(label[0]),
                           label[1] * 100,
@@ -332,18 +352,24 @@ def uploaded_file_detect(uploaded_files, save_location):
     left_side, right_side = save_location.split('_')
     date_value = left_side[0:4] + '년' + left_side[4:6] + '월' + left_side[6:8] + '일'
     time_value = right_side[0:2] + '시' + right_side[2:4] + '분' + right_side[4:6] + '초'
-
+    print('11111111',current_path+'\logo.png')
+    print(type(current_path +"""/""" + 'logo.png'))
+    print("C:\\Users\\user\\PycharmProjects\\doctoreye_3\\logo.png")
+    with open(current_path + "/name_logo.jpg", "rb") as img_file:
+        logo_bytes = img_file.read()
+    logo_path = base64.b64encode(logo_bytes).decode()
     variables = {'name': '홍길동',
                  'age': 0,
                  'date': date_value,
                  'time': time_value,
                  'sex': "man",
-                 'left_img_path': left_data[4],
+                 'left_img_path': left_img_base64,
                  'left_data_value': left_data[3],
-                 'right_img_path': right_data[4],
+                 'right_img_path': right_img_base64,
                  'right_data_value': right_data[3],
-                 }
+                 'logo_img_path': logo_path}
     html_content = render_html_template(variables)
+
     save_rendered_html(html_content, str('./data/' + save_location + '/' + f'{save_location}.html'))
 
     with col1:
@@ -354,7 +380,10 @@ def uploaded_file_detect(uploaded_files, save_location):
         st.header('우안')
         st.image(right_data[0])
         st.write('판독 결과: ', right_data[1], str(right_data[2])[0:5] + '%')
-    open_html_file('/data/' + save_location + '/' + save_location + ".html")
+    # with open(('./data/' + save_location + '/' + f'{save_location}.html'), "r", encoding="utf-8") as f:
+    #     html_content = f.read()
+    st.components.v1.html(html_content, height=1200, scrolling=True)
+    # open_html_file('/data/' + save_location + '/' + save_location + ".html")
 
 def open_past_html(file_path):
     webbrowser.open(file_path, new=2)
