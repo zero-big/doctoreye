@@ -138,8 +138,8 @@ def render_html_template(variables):
                 <tr>
                     <td style="text-align: center; font-size: 20px"><div class="mt-8"><p class="text-md">
                         DoctorEye 인공지능을 이용한 판독 결과,<br>
-                        귀하의 오른쪽 안저사진에서 <span style="color:blue" class="font-bold">{{right_label}}</span> 이 의심 됩니다.<br>
-                        귀하의 왼쪽 안저사진에서 <span style="color:blue" class="font-bold">{{left_label}}</span> 이 의심 됩니다.
+                        귀하의 오른쪽 안저사진은 <span style="color:blue" class="font-bold">{{right_label}}</span> 로 판단 됩니다.<br>
+                        귀하의 왼쪽 안저사진은 <span style="color:blue" class="font-bold">{{left_label}}</span> 로 판단 됩니다.
                     </div></td>
                     </tr>
                 <tr>
@@ -161,7 +161,7 @@ def render_html_template(variables):
                 <tr>
                     <td colspan="4" style="text-align: left; font-size: 20px"><div class="mt-12"><p class="text-md">
                     본 진단은 50만장의 안저 사진을 학습 한 AI알고리즘이 분석한 결과입니다.
-                    본 결과는 단지 안저 영상 검사 결과를 기반으로 한 의학적인 정보를 바탕으로
+                    본 결과는 단지 안저 이미지를 AI알고리즘 기반으로 한 의학적인 정보를 바탕으로
                     환자의 상태를 파악하는데 도움을 줄 수 있는 참고용으로만 사용하시길 바랍니다.
                     </p></div></td>
                 </tr>
@@ -362,10 +362,10 @@ def past_data(selected_option, folder_path):
             print('불러낸 이미지', image_files[0])
             label2 = classify_image(image_path)
             st.write('분류 결과 : %s (%.2f%%) ' % (label_change(label2[0]), label2[1] * 100))
-    with open(current_path+'/' +image_folder_path+'/'+folder_path+'.html', 'r', encoding='utf8') as f:
-        html_string = f.read()
+        with open(current_path+'/' +image_folder_path+'/'+folder_path+'.html', 'r', encoding='utf8') as f:
+            html_string = f.read()
     # Streamlit 앱에 HTML 렌더링
-    st.components.v1.html(html_string, height=1200, scrolling=True)
+        st.components.v1.html(html_string, height=1200, scrolling=True)
 
 def load_img_base(url):
     current_path = os.getcwd()
