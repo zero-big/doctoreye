@@ -9,6 +9,7 @@ import webbrowser
 import datetime
 from jinja2 import Template
 import base64
+import streamlit.components.v1 as components
 def render_html_template(variables):
     # Define your HTML template with placeholders for variables
     html_template = """
@@ -186,7 +187,6 @@ def save_rendered_html(html_content, filename):
         file.write(html_content)
 
 def lr_classifi(image_path):
-    print(image_path)
     image = cv2.imread(image_path)
     # Get the dimensions of the original image
     height, width, _ = image.shape
@@ -235,31 +235,9 @@ def lr_classifi(image_path):
         else:
             position = "불명"
 
-
-        # Display the result
-        # cv2.imshow('Result', image)
-        # print(f"The blue dot is to the {position} of the center of the original image.")
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
     return position
 
-import streamlit.components.v1 as components
-def open_html_file(url_path):
-    current_path = os.getcwd()
-    print(current_path+url_path)
-    try:
-        if os.path.exists(current_path+url_path):
-            html_url = current_path+url_path
-            print(html_url)
-            print(type(html_url))
-            p = open(current_path+url_path)
-            components.html(p.read())
-            print("pppppppppppppppppppppppppppp")
-            webbrowser.open(current_path+url_path)
-        else:
-            st.write('"결과지를 작성중입니다. 잠시만 기다려주세요.')
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+
 
 def label_change(name_tag):
     if name_tag == 'age_related_macular_degeneration':
@@ -278,22 +256,20 @@ def label_change(name_tag):
 def data_list(name_tag):
     if name_tag == '당뇨망막병증':
         data_value = ['비정상', '정상', '정상']
+        return data_value
     if name_tag == '황반변성':
         data_value = ['정상', '비정상', '정상']
+        return data_value
     if name_tag == '녹내장':
         data_value = ['정상', '정상', '비정상']
+        return data_value
     else:
         data_value = ['정상', '정상', '정상']
-    return data_value
-
-# 모델 로드
+        return data_value
 
 model = load_model("./total_dataset_weight_2.h5")
 
-# print(current_path+'/'+"total_dataset_weight_2.h5")
-
 def classify_image(image, load_open= None):
-
     # 이미지 전처리
     image = Image.open(image)
     image = image.resize((299, 299))
@@ -306,7 +282,6 @@ def classify_image(image, load_open= None):
     highest_value = max(prediction[0])
     predicted_class_index = np.argmax(prediction)
     predicted_class_name = class_names[predicted_class_index]
-
     return predicted_class_name, highest_value
 
 def save_uploaded_files(uploaded_files):
@@ -327,41 +302,32 @@ def createfolder(folder_path):
 def past_data(selected_option, folder_path):
     current_path = os.getcwd()
     image_folder_path = 'data/' + folder_path
-    #
-    # if st.button("결과지 출력") and folder_path != '':
-    #     # current_path = os.getcwd()
-    #     open_past_html(current_path+'/' +image_folder_path+'/'+folder_path+'.html')
-
     if folder_path != '':
         image_files = [f for f in os.listdir(image_folder_path) if
                        f.endswith('.png') or f.endswith('.jpg') or f.endswith('.jpeg')]
-        print('불렀다', image_files, type(image_files))
         if len(image_files) == 2:
+            lr_data = lr_classifi
             title_name = folder_path
             time_str = title_name[-6:]
             title_name = title_name[:-7]
             formatted_time = f"{time_str[:2]}:{time_str[2:4]}:{time_str[4:]}"
-            print('etetet', title_name)
             st.header(f"{title_name}-{formatted_time} 촬영 데이터")
             col1, col2 = st.columns(2)
             with col1:
                 image_path = image_folder_path + '/' + image_files[0]
                 st.image(image_path)
-                print('불러낸 이미지', image_files[0])
                 label2 = classify_image(image_path)
                 st.write('판독 결과: %s (%.2f%%)' % (label_change(label2[0]), label2[1] * 100))
             with col2:
                 image_path = image_folder_path + '/' + image_files[1]
                 st.image(image_path)
-                print('불러낸 이미지', image_files[1])
                 label2 = classify_image(image_path)
                 st.write('판독 결과: %s (%.2f%%)' % (label_change(label2[0]), label2[1] * 100))
         if len(image_files) < 2 and len(image_files) > 0:
             image_path = image_folder_path + '/' + image_files[0]
             st.image(image_path, use_column_width=True)
-            print('불러낸 이미지', image_files[0])
             label2 = classify_image(image_path)
-            st.write('분류 결과 : %s (%.2f%%) ' % (label_change(label2[0]), label2[1] * 100))
+            st.write('판독 결과 : %s (%.2f%%) ' % (label_change(label2[0]), label2[1] * 100))
         with open(current_path+'/' +image_folder_path+'/'+folder_path+'.html', 'r', encoding='utf8') as f:
             html_string = f.read()
     # Streamlit 앱에 HTML 렌더링
@@ -369,7 +335,6 @@ def past_data(selected_option, folder_path):
 
 def load_img_base(url):
     current_path = os.getcwd()
-    print(current_path+url)
     with open(current_path + url, "rb") as img_file:
         bytes = img_file.read()
     img_base64 = base64.b64encode(bytes).decode()
@@ -377,11 +342,13 @@ def load_img_base(url):
 def uploaded_file_detect(uploaded_files, save_location):
     col1, col2 = st.columns(2)
     current_path = os.getcwd()
+    left_count = 0
+    right_count = 0
     for uploaded_file in uploaded_files:
         lr_data = lr_classifi(current_path+str('/data/' + save_location + '/' + uploaded_file.name))
-        print(lr_data)
         label = classify_image(uploaded_file)
-        if lr_data == '좌안' or lr_data == '불명':
+        if (lr_data == '좌안' or lr_data == '불명') and left_count == 0:
+            left_count += 1
             with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
                 img_bytes = img_file.read()
             left_img_base64 = base64.b64encode(img_bytes).decode()
@@ -390,10 +357,18 @@ def uploaded_file_detect(uploaded_files, save_location):
                          label[1] * 100,
                          data_list(label_change(label[0])),
                          uploaded_file.name]
-            # with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
-            #     img_bytes = img_file.read()
-            # left_img_base64 = base64.b64encode(img_bytes).decode()
-        else:
+        elif (lr_data == '좌안' or lr_data == '불명') and right_count == 0:
+            load_img_base()
+            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+                img_bytes = img_file.read()
+            right_img_base64 = base64.b64encode(img_bytes).decode()
+            right_data = ['./data/' + save_location + '/' + uploaded_file.name,
+                          label_change(label[0]),
+                          label[1] * 100,
+                          data_list(label_change(label[0])),
+                          uploaded_file.name]
+        elif lr_data == '우안' and right_count ==0:
+            right_count += 1
             with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
                 img_bytes = img_file.read()
             right_img_base64 = base64.b64encode(img_bytes).decode()
@@ -403,25 +378,21 @@ def uploaded_file_detect(uploaded_files, save_location):
                           data_list(label_change(label[0])),
                           uploaded_file.name]
 
+        elif lr_data == '우안' and left_count == 0:
+            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+                img_bytes = img_file.read()
+            left_img_base64 = base64.b64encode(img_bytes).decode()
+            left_data = ['./data/' + save_location + '/' + uploaded_file.name,
+                         label_change(label[0]),
+                         label[1] * 100,
+                         data_list(label_change(label[0])),
+                         uploaded_file.name]
     left_side, right_side = save_location.split('_')
     date_value = left_side[0:4] + '년' + left_side[4:6] + '월' + left_side[6:8] + '일'
     time_value = right_side[0:2] + '시' + right_side[2:4] + '분' + right_side[4:6] + '초'
-    # print('11111111',current_path+'\logo.png')
-    # print(type(current_path +"""/""" + 'logo.png'))
-    # print("C:\\Users\\user\\PycharmProjects\\doctoreye_3\\logo.png")
     logo_path = load_img_base("/name_logo.jpg")
-    # with open(current_path + "/name_logo.jpg", "rb") as img_file:
-    #     logo_bytes = img_file.read()
-    # logo_path = base64.b64encode(logo_bytes).decode()
-
-    # with open(current_path + "/normal_left.jpg", "rb") as img_file:
-    #     normal_left_bytes = img_file.read()
-    # normal_left = base64.b64encode(normal_left_bytes).decode()
     normal_left = load_img_base("/normal_left.jpg")
     normal_right= load_img_base("/normal_right.jpg")
-    # with open(current_path + "/normal_right.jpg", "rb") as img_file:
-    #     normal_right_bytes = img_file.read()
-    # normal_right = base64.b64encode(normal_right_bytes).decode()
     variables = {'name': '홍길동',
                  'age': str(72)+"세",
                  'date': date_value,
@@ -449,18 +420,11 @@ def uploaded_file_detect(uploaded_files, save_location):
         st.header('우안')
         st.image(right_data[0])
         st.write('판독 결과: ', right_data[1], str(right_data[2])[0:5] + '%')
-    # with open(('./data/' + save_location + '/' + f'{save_location}.html'), "r", encoding="utf-8") as f:
-    #     html_content = f.read()
-    st.components.v1.html(html_content, height=1200, scrolling=True)
-    # open_html_file('/data/' + save_location + '/' + save_location + ".html")
 
-def open_past_html(file_path):
-    webbrowser.open(file_path, new=2)
+    st.components.v1.html(html_content, height=1200, scrolling=True)
 
 def main():
-
     createfolder('./data')
-    current_path = os.getcwd()
     if "logged_in" not in session_state:
         session_state["logged_in"] = False
     if session_state["logged_in"]:
@@ -471,8 +435,10 @@ def main():
         if st.sidebar.button('로그아웃'):
             session_state["logged_in"] = False
             st.rerun()
-
-        selection = st.sidebar.radio("업무 선택", ("메인화면","실시간 판독", "지난 데이터"))
+        st.sidebar.markdown('''
+                    ### 업무선택
+                    ''')
+        selection = st.sidebar.radio("업무선택",["메인화면","실시간 판독", "지난 데이터"], label_visibility="collapsed")
         if selection == '메인화면':
             session_state["rerun"] = True
             st.header("Doctor EYE")
@@ -481,15 +447,16 @@ def main():
         if selection == '실시간 판독':
             if session_state['rerun']:
                 session_state['rerun'] = False
-                st.rerun()
+                # st.rerun()
             if st.button('처음으로'):
                 session_state["logged_in"] = True
                 st.rerun()
             with st.form("my-form", clear_on_submit=True):
-                uploaded_files = st.file_uploader("안저 사진 올리기", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'])
+                uploaded_files = st.file_uploader("안저 사진 올리기",accept_multiple_files=True, type=['png', 'jpg', 'jpeg'])
                 submitted = st.form_submit_button("판독 시작")
-            print('fsadfadsfdasfdasfsd', len(uploaded_files))
-            if len(uploaded_files) != 0:
+            if len(uploaded_files) >2:
+                st.warning('파일 업로드는 최대 2개까지 가능합니다.')
+            if len(uploaded_files) != 0 and len(uploaded_files)<=2:
                 save_location = save_uploaded_files(uploaded_files)
                 uploaded_file_detect(uploaded_files, save_location)
         if selection == '지난 데이터':
@@ -499,7 +466,6 @@ def main():
                 st.rerun()
             folder_path = './data'  # 폴더 경로
             subfolders = [f.name for f in os.scandir(folder_path) if f.is_dir()]
-            print(subfolders)
             sorted_options = ['']+sorted(subfolders, reverse=True)
             # 셀렉트박스 추가
             selected_option = st.selectbox('지난 데이터', sorted_options, index=0)
@@ -521,13 +487,6 @@ def main():
                 st.rerun()
             else:
                 st.sidebar.error('아이디 또는 비밀번호가 잘못되었습니다.')
-        # 로그인 전 보여질 페이지
-
-
-                # sidebar_bg(side_bg)
-                #
-                # set_background_image("bg.jpg")
-
 
 if __name__ == "__main__":
     main()
