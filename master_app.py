@@ -10,6 +10,9 @@ import datetime
 from jinja2 import Template
 import base64
 import streamlit.components.v1 as components
+
+model = load_model("./total_dataset_weight_2.h5")
+
 def render_html_template(variables):
     # Define your HTML template with placeholders for variables
     html_template = """
@@ -66,13 +69,13 @@ def render_html_template(variables):
                 <div class="flex justify-center items-center">
                 <div>
                     <h2 class="text-center font-bold mb-2">좌안</h2>
-                    <img src=data:image/png;base64,{{ normal_left_path }}  alt="Right eye fundus image placeholder" class="w-120 h-120 place-content-center" />
+                    <img src=data:image/png;base64,{{ normal_path[0] }}  alt="Right eye fundus image placeholder" class="w-120 h-120 place-content-center" />
                 </div>
                 </div>
                                 <div class="flex justify-center items-center">
                 <div>
                     <h2 class="text-center font-bold mb-2">우안</h2>
-                     <img src=data:image/png;base64,{{ normal_right_path }} alt="Left eye fundus image placeholder" class="w-120 h-120 place-content-center" />
+                     <img src=data:image/png;base64,{{ normal_path[1] }} alt="Left eye fundus image placeholder" class="w-120 h-120 place-content-center" />
                 </div>
                 </div>
                 <div>
@@ -181,7 +184,6 @@ def render_html_template(variables):
     rendered_html = template.render(variables)
     return rendered_html
 
-
 def save_rendered_html(html_content, filename):
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(html_content)
@@ -224,7 +226,7 @@ def lr_classifi(image_path):
         position = "불명"
     else:
         # Draw a circle around the brightest point
-        cv2.circle(image, brightest_point, 5, (255, 0, 0), 2)
+        # cv2.circle(image, brightest_point, 5, (255, 0, 0), 2)
         # Calculate the center of the original image
         center_x = width // 2
         # Determine if the blue dot is to the left or right of the center
@@ -236,8 +238,6 @@ def lr_classifi(image_path):
             position = "불명"
 
     return position
-
-
 
 def label_change(name_tag):
     if name_tag == 'age_related_macular_degeneration':
@@ -266,8 +266,6 @@ def data_list(name_tag):
     else:
         data_value = ['정상', '정상', '정상']
         return data_value
-
-model = load_model("./total_dataset_weight_2.h5")
 
 def classify_image(image, load_open= None):
     # 이미지 전처리
@@ -299,27 +297,40 @@ def createfolder(folder_path):
     except OSError:
         print("Error: Failed to create the directory.")
 
-def past_data(selected_option, folder_path):
+def past_data(selected_option):
     current_path = os.getcwd()
-    image_folder_path = 'data/' + folder_path
-    if folder_path != '':
+    image_folder_path = 'data/' + selected_option
+    if selected_option != '':
+        title_name = selected_option
+        time_str = title_name[-6:]
+        title_name = title_name[:-7]
+        formatted_time = f"{time_str[:2]}:{time_str[2:4]}:{time_str[4:]}"
+        st.header(f"{title_name}-{formatted_time} 촬영 데이터")
         image_files = [f for f in os.listdir(image_folder_path) if
                        f.endswith('.png') or f.endswith('.jpg') or f.endswith('.jpeg')]
         if len(image_files) == 2:
-            lr_data = lr_classifi
-            title_name = folder_path
-            time_str = title_name[-6:]
-            title_name = title_name[:-7]
-            formatted_time = f"{time_str[:2]}:{time_str[2:4]}:{time_str[4:]}"
-            st.header(f"{title_name}-{formatted_time} 촬영 데이터")
+            left_count = 0
+            right_count = 0
+            for image_file in image_files:
+                lr_data = lr_classifi(current_path + str('/data/' + selected_option + '/' + image_file))
+                if (lr_data == '좌안' or lr_data == '불명') and left_count == 0:
+                    left_count += 1
+                    left_img = image_file
+                elif (lr_data == '좌안' or lr_data == '불명') and right_count == 0 and left_count == 1:
+                    right_img = image_file
+                elif lr_data == '우안' and right_count == 0:
+                    right_count += 1
+                    right_img = image_file
+                elif lr_data == '우안' and left_count == 0 and right_count == 1:
+                    left_img = image_file
             col1, col2 = st.columns(2)
             with col1:
-                image_path = image_folder_path + '/' + image_files[0]
+                image_path = image_folder_path + '/' + left_img
                 st.image(image_path)
                 label2 = classify_image(image_path)
                 st.write('판독 결과: %s (%.2f%%)' % (label_change(label2[0]), label2[1] * 100))
             with col2:
-                image_path = image_folder_path + '/' + image_files[1]
+                image_path = image_folder_path + '/' + right_img
                 st.image(image_path)
                 label2 = classify_image(image_path)
                 st.write('판독 결과: %s (%.2f%%)' % (label_change(label2[0]), label2[1] * 100))
@@ -328,7 +339,7 @@ def past_data(selected_option, folder_path):
             st.image(image_path, use_column_width=True)
             label2 = classify_image(image_path)
             st.write('판독 결과 : %s (%.2f%%) ' % (label_change(label2[0]), label2[1] * 100))
-        with open(current_path+'/' +image_folder_path+'/'+folder_path+'.html', 'r', encoding='utf8') as f:
+        with open(current_path+'/' +image_folder_path+'/'+selected_option+'.html', 'r', encoding='utf8') as f:
             html_string = f.read()
     # Streamlit 앱에 HTML 렌더링
         st.components.v1.html(html_string, height=1200, scrolling=True)
@@ -349,19 +360,20 @@ def uploaded_file_detect(uploaded_files, save_location):
         label = classify_image(uploaded_file)
         if (lr_data == '좌안' or lr_data == '불명') and left_count == 0:
             left_count += 1
-            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
-                img_bytes = img_file.read()
-            left_img_base64 = base64.b64encode(img_bytes).decode()
+            left_img_base64 = load_img_base(str('/data/' + save_location + '/' + uploaded_file.name))
+            # with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+            #     img_bytes = img_file.read()
+            # left_img_base64 = base64.b64encode(img_bytes).decode()
             left_data = ['./data/' + save_location + '/' + uploaded_file.name,
                          label_change(label[0]),
                          label[1] * 100,
                          data_list(label_change(label[0])),
                          uploaded_file.name]
         elif (lr_data == '좌안' or lr_data == '불명') and right_count == 0:
-            load_img_base()
-            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
-                img_bytes = img_file.read()
-            right_img_base64 = base64.b64encode(img_bytes).decode()
+            right_img_base64 = load_img_base(str('/data/' + save_location + '/' + uploaded_file.name))
+            # with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+            #     img_bytes = img_file.read()
+            # right_img_base64 = base64.b64encode(img_bytes).decode()
             right_data = ['./data/' + save_location + '/' + uploaded_file.name,
                           label_change(label[0]),
                           label[1] * 100,
@@ -369,9 +381,10 @@ def uploaded_file_detect(uploaded_files, save_location):
                           uploaded_file.name]
         elif lr_data == '우안' and right_count ==0:
             right_count += 1
-            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
-                img_bytes = img_file.read()
-            right_img_base64 = base64.b64encode(img_bytes).decode()
+            right_img_base64 =load_img_base(str('/data/' + save_location + '/' + uploaded_file.name))
+            # with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+            #     img_bytes = img_file.read()
+            # right_img_base64 = base64.b64encode(img_bytes).decode()
             right_data = ['./data/' + save_location + '/' + uploaded_file.name,
                           label_change(label[0]),
                           label[1] * 100,
@@ -379,9 +392,10 @@ def uploaded_file_detect(uploaded_files, save_location):
                           uploaded_file.name]
 
         elif lr_data == '우안' and left_count == 0:
-            with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
-                img_bytes = img_file.read()
-            left_img_base64 = base64.b64encode(img_bytes).decode()
+            left_img_base64 = load_img_base(str('/data/' + save_location + '/' + uploaded_file.name))
+            # with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
+            #     img_bytes = img_file.read()
+            # left_img_base64 = base64.b64encode(img_bytes).decode()
             left_data = ['./data/' + save_location + '/' + uploaded_file.name,
                          label_change(label[0]),
                          label[1] * 100,
@@ -405,8 +419,8 @@ def uploaded_file_detect(uploaded_files, save_location):
                  'right_label': right_data[1],
                  'right_data_value': right_data[3],
                  'logo_img_path': logo_path,
-                 'normal_left_path': normal_left,
-                 'normal_right_path': normal_right,
+                 'normal_path': [normal_left, normal_right]
+                 # 'normal_path': normal_right,
                  }
     html_content = render_html_template(variables)
 
@@ -469,7 +483,7 @@ def main():
             sorted_options = ['']+sorted(subfolders, reverse=True)
             # 셀렉트박스 추가
             selected_option = st.selectbox('지난 데이터', sorted_options, index=0)
-            past_data(folder_path, selected_option)
+            past_data(selected_option)
 
     else:
         st.sidebar.image("logo_3.jpeg", use_column_width=True)
