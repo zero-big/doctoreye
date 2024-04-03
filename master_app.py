@@ -36,7 +36,7 @@ def render_html_template(variables):
                 <div class="flex justify-between items-center">
                  <img src=data:image/png;base64,{{ logo_img_path }} alt="Mediwhale logo placeholder" class="h-12 float-left mr-4"> 
                 <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    프린터
+                    출력
                 </button>
             </div>
             <br>
@@ -143,8 +143,8 @@ def render_html_template(variables):
                 <tr>
                     <td style="text-align: center; font-size: 20px"><div class="mt-8"><p class="text-md">
                         DoctorEye 인공지능을 이용한 판독 결과,<br>
-                        귀하의 왼쪽 안저사진은 <span style="color:blue" class="font-bold">{{left_label}}</span> 로 판단 됩니다.<br>
-                        귀하의 오른쪽 안저사진은 <span style="color:blue" class="font-bold">{{right_label}}</span> 로 판단 됩니다.
+                        귀하의 좌안 안저사진은 <span style="color:blue" class="font-bold">{{left_label}}</span> 로 판단 됩니다.<br>
+                        귀하의 우안 안저사진은 <span style="color:blue" class="font-bold">{{right_label}}</span> 로 판단 됩니다.
                     </div></td>
                     </tr>
                 <tr>
@@ -469,12 +469,9 @@ def main():
 
             side_bg = 'bg.jpg'
         if selection == '실시간 판독':
-            if session_state['rerun']:
-                session_state['rerun'] = False
+            # if session_state['rerun']:
+            #     session_state['rerun'] = False
                 # st.rerun()
-            if st.button('처음으로'):
-                session_state["logged_in"] = True
-                st.rerun()
             with st.form("my-form", clear_on_submit=True):
                 uploaded_files = st.file_uploader("안저 사진 올리기",accept_multiple_files=True, type=['png', 'jpg', 'jpeg'])
                 submitted = st.form_submit_button("판독 시작")
