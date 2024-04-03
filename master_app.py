@@ -11,7 +11,8 @@ from jinja2 import Template
 import base64
 import streamlit.components.v1 as components
 
-model = load_model("./total_dataset_weight_2.h5")
+current_path = os.getcwd()
+model = load_model(current_path + "/total_dataset_weight_2.h5")
 
 def render_html_template(variables):
     # Define your HTML template with placeholders for variables
