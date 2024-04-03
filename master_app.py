@@ -456,8 +456,17 @@ def main():
         selection = st.sidebar.radio("업무선택",["메인화면","실시간 판독", "지난 데이터"], label_visibility="collapsed")
         if selection == '메인화면':
             session_state["rerun"] = True
-            st.header("Doctor EYE")
-            st.image("logo.png", use_column_width=True)
+            # st.image("name_logo.jpg", use_column_width=True)
+            st.header("Doctor Eye", divider='rainbow')
+            col1, col2 = st.columns([1,3])
+            with col1:
+                st.image("logo_4.png", use_column_width=True)
+            with col2:
+                st.markdown("## Doctor Eye 메뉴 설명")
+                st.markdown("1. **메인화면** : 로그인 화면으로 돌아가기")
+                st.markdown("2. **실시간 판독** : 촬영한 사진을 업로드 하여 판독")
+                st.markdown("3. **지난 데이터** : 이전에 촬영한 데이터 확인")
+
             side_bg = 'bg.jpg'
         if selection == '실시간 판독':
             if session_state['rerun']:
