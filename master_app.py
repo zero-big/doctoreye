@@ -495,7 +495,7 @@ def main():
         # st.header("Doctor EYE")
         st.image("name_logo.jpg", use_column_width=True)
         st.header("", divider='rainbow')
-        st.markdown("**DoctorEye**는 서울대학교 교수진이 직접 설계한 AI 알고리즘에 50만 장의 망막 사진을 학습시킨 인공지능 프로그램입니다. \n\n 안저 카메라에서 촬영한 안저 이미지를 DoctorEye를 통해 분석합니다. \n\n한번에 3가지 질병을 진단 할 수 있어 편리하며 보다 빠르고 정확한 분석이 가능합니다.\n\n 질병을 초기에 진단하는 인공지능 헬스케어 솔루션입니다.")
+        st.markdown("<span style='font-size: 40px;'>**DoctorEye**</span>는 서울대학교 교수진이 직접 설계한 AI 알고리즘에 50만 장의 망막 사진을 학습시킨 인공지능 프로그램입니다. \n\n 안저 카메라에서 촬영한 안저 이미지를 DoctorEye를 통해 분석합니다. \n\n한번에 3가지 질병을 진단 할 수 있어 편리하며 보다 빠르고 정확한 분석이 가능합니다.\n\n 질병을 초기에 진단하는 인공지능 헬스케어 솔루션입니다.", unsafe_allow_html=True)
         side_bg = 'bg.jpg'
         if st.sidebar.button('로그인') or (username and password):
             if username == 'admin' and password == 'admin':  # 예시용 로그인 정보
