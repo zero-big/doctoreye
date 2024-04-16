@@ -13,7 +13,7 @@ import streamlit.components.v1 as components
 
 current_path = os.getcwd()
 model = load_model(current_path + "/total_dataset_weight_2.h5")
-
+model_papil = load_model(current_path + "/Papillede_V2.h5")
 def render_html_template(variables):
     # Define your HTML template with placeholders for variables
     html_template = """
@@ -93,7 +93,7 @@ def render_html_template(variables):
                 <h2 class="text-center font-bold mb-2" style="font-size: 22px;">환자 안저이미지</h2>
             </div>
  
-            <div class="mt-8">
+            <div class="mt-12">
                 <table class="w-full text-center">
                     <thead>
                         <tr>
@@ -107,22 +107,26 @@ def render_html_template(variables):
                             <td class="bg-gray-300 border-blue-200 text-black p-2">당뇨망막병증</td>
                             <td class="bg-gray-300 border-blue-200 text-black p-2">황반변성</td>
                             <td class="bg-gray-300 border-blue-200 text-black p-2">녹내장</td>
+                            <td class="bg-gray-300 border-blue-200 text-black p-2">유두부종</td>
                         </tr>
                         <tr>
                             <td class="border border-blue-200 text-black p-2">{{ left_data_value[0] }}</td>
                             <td class="border border-blue-200 text-black p-2">{{ left_data_value[1] }}</td>
                             <td class="border border-blue-200 text-black p-2">{{ left_data_value[2] }}</td>
+                            <td class="border border-blue-200 text-black p-2">{{ Papilledema[0] }}</td>
                         </tr>
                         <tr>
                             <td class="bg-blue-200 border-blue-400 text-black p-2" rowspan="2">우안</td>
                             <td class="bg-gray-300 border-blue-200 text-black p-2">당뇨망막병증</td>
                             <td class="bg-gray-300 border-blue-200 text-black p-2">황반변성</td>
                             <td class="bg-gray-300 border-blue-200 text-black p-2">녹내장</td>
+                            <td class="bg-gray-300 border-blue-200 text-black p-2">유두부종</td>
                         </tr>
                         <tr>
                             <td class="border border-blue-200 text-black p-2">{{ right_data_value[0] }}</td>
                             <td class="border border-blue-200 text-black p-2">{{ right_data_value[1] }}</td>
                             <td class="border border-blue-200 text-black p-2">{{ right_data_value[2] }}</td>
+                            <td class="border border-blue-200 text-black p-2">{{ Papilledema[1] }}</td>
                         </tr>
 
                     </tbody>
@@ -268,6 +272,14 @@ def data_list(name_tag):
         data_value = ['정상', '정상', '정상']
         return data_value
 
+def convert_into_pixel(img):
+  img = img.resize((299,299))
+  img_pixel = np.array(img)
+
+  img_pixel = img_pixel / 255
+
+  return img_pixel
+
 def classify_image(image, load_open= None):
     # 이미지 전처리
     image = Image.open(image)
@@ -276,12 +288,22 @@ def classify_image(image, load_open= None):
     image = np.expand_dims(image, axis=0)
     image = image / 255.0
     # 예측
+
+    pred_papilledema = model_papil.predict(image, verbose=0)
+    pred_papilledema_class = np.argmax(pred_papilledema)
+    if (pred_papilledema_class == 0):
+        pred_papill = "정상"
+    if (pred_papilledema_class == 1):
+        pred_papill = "비정상"
+    if (pred_papilledema_class == 2):
+        pred_papill = "정상"
+
     class_names = ['age_related_macular_degeneration', 'diabetic', 'glaucoma', 'normal']
     prediction = model.predict(image, verbose=0)
     highest_value = max(prediction[0])
     predicted_class_index = np.argmax(prediction)
     predicted_class_name = class_names[predicted_class_index]
-    return predicted_class_name, highest_value
+    return predicted_class_name, highest_value, pred_papill
 
 def save_uploaded_files(uploaded_files):
     folder_name = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -369,7 +391,8 @@ def uploaded_file_detect(uploaded_files, save_location):
                          label_change(label[0]),
                          label[1] * 100,
                          data_list(label_change(label[0])),
-                         uploaded_file.name]
+                         uploaded_file.name,
+                         label[2]]
         elif (lr_data == '좌안' or lr_data == '불명') and right_count == 0:
             right_img_base64 = load_img_base(str('/data/' + save_location + '/' + uploaded_file.name))
             # with open(current_path+str('/data/' + save_location + '/' + uploaded_file.name), "rb") as img_file:
@@ -379,7 +402,8 @@ def uploaded_file_detect(uploaded_files, save_location):
                           label_change(label[0]),
                           label[1] * 100,
                           data_list(label_change(label[0])),
-                          uploaded_file.name]
+                          uploaded_file.name,
+                          label[2]]
         elif lr_data == '우안' and right_count ==0:
             right_count += 1
             right_img_base64 =load_img_base(str('/data/' + save_location + '/' + uploaded_file.name))
@@ -390,7 +414,8 @@ def uploaded_file_detect(uploaded_files, save_location):
                           label_change(label[0]),
                           label[1] * 100,
                           data_list(label_change(label[0])),
-                          uploaded_file.name]
+                          uploaded_file.name,
+                          label[2]]
 
         elif lr_data == '우안' and left_count == 0:
             left_img_base64 = load_img_base(str('/data/' + save_location + '/' + uploaded_file.name))
@@ -401,7 +426,8 @@ def uploaded_file_detect(uploaded_files, save_location):
                          label_change(label[0]),
                          label[1] * 100,
                          data_list(label_change(label[0])),
-                         uploaded_file.name]
+                         uploaded_file.name,
+                         label[2]]
     left_side, right_side = save_location.split('_')
     date_value = left_side[0:4] + '년' + left_side[4:6] + '월' + left_side[6:8] + '일'
     time_value = right_side[0:2] + '시' + right_side[2:4] + '분' + right_side[4:6] + '초'
@@ -420,7 +446,8 @@ def uploaded_file_detect(uploaded_files, save_location):
                  'right_label': right_data[1],
                  'right_data_value': right_data[3],
                  'logo_img_path': logo_path,
-                 'normal_path': [normal_left, normal_right]
+                 'normal_path': [normal_left, normal_right],
+                 'Papilledema' : [left_data[5], right_data[5]]
                  # 'normal_path': normal_right,
                  }
     html_content = render_html_template(variables)
