@@ -135,10 +135,11 @@ def render_html_template(variables):
                 <tr>
                     <td style="text-align: center; font-size: 20px"><div class="mt-8"><p class="text-md">
                         DoctorEye 인공지능을 이용한 판독 결과,<br>
-                        귀하의 좌안 안저사진은 <span style="color:blue" class="font-bold">{{left_label}}</span> 로 판단 됩니다.<br>
-                        귀하의 우안 안저사진은 <span style="color:blue" class="font-bold">{{right_label}}</span> 로 판단 됩니다.
+                        귀하의 좌안 안저이미지는 <span style="color:blue" class="font-bold">{{left_label}}</span> 로 판단됩니다.<br>
+                        귀하의 우안 안저이미지는 <span style="color:blue" class="font-bold">{{right_label}}</span> 로 판단됩니다.<br>
+                        귀하의 유두부종은 좌안 <span style="color:blue" class="font-bold">{{ Papilledema[0] }}</span>, 우안 <span style="color:blue" class="font-bold">{{ Papilledema[1] }}</span> 으로 판단 됩니다.
                     </div></td>
-                    </tr>
+                </tr>
                 <tr>
                     <td colspan="4" style="text-align: center; font-size: 20px"><div class="mt-12"><p class="text-md">
                         조속한 시일 내에 정확한 진단과 추가적인 검사 및 꾸준한 치료를 위해 가까운 안과에 방문하셔서 안과 전문의에게 검진 받으시기를 권고 드립니다.<br>
