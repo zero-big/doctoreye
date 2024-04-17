@@ -6,7 +6,7 @@ import numpy as np
 import os
 import cv2
 import webbrowser
-import datetime
+from datetime import datetime,timedelta, timezone
 from jinja2 import Template
 import base64
 import streamlit.components.v1 as components
@@ -306,7 +306,7 @@ def classify_image(image, load_open= None):
     return predicted_class_name, highest_value, pred_papill
 
 def save_uploaded_files(uploaded_files):
-    folder_name = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    folder_name = (datetime.now(timezone.utc)+timedelta(hours=9)).strftime('%Y%m%d_%H%M%S')
     os.makedirs('data/' + folder_name, exist_ok=True)
     for uploaded_file in uploaded_files:
         with open(os.path.join('data/' + folder_name, uploaded_file.name), "wb") as f:
