@@ -39,7 +39,7 @@ def lr_classifi(image_path):
         position = "불명"
     else:
         # Draw a circle around the brightest point
-        cv2.circle(image, brightest_point, 5, (255, 0, 0), 2)
+        # cv2.circle(image, brightest_point, 5, (255, 0, 0), 2)
         # Calculate the center of the original image
         center_x = width // 2
         # Determine if the blue dot is to the left or right of the center
@@ -50,10 +50,4 @@ def lr_classifi(image_path):
         else:
             position = "불명"
 
-
-        # Display the result
-        # cv2.imshow('Result', image)
-        # print(f"The blue dot is to the {position} of the center of the original image.")
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
     return position
