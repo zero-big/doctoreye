@@ -29,7 +29,7 @@ def render_html_template(variables):
         <div class="container mx-auto px-4 py-8">
             <div class="border-b-4 border-blue-800 pb-4">
                 <div class="flex justify-between items-center">
-                 <img src="../../name_logo.jpg" alt="Mediwhale logo placeholder" class="h-12 float-left mr-4"> 
+                 <img src={{ logo_img_path }} alt="Mediwhale logo placeholder" class="h-12 float-left mr-4"> 
                 <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     프린터
                 </button>
@@ -338,11 +338,11 @@ def uploaded_file_detect(uploaded_files, save_location):
                  'date': date_value,
                  'time': time_value,
                  'sex': "man",
-                 'left_img_path': left_data[4],
+                 'left_img_path': current_path+ left_data[4],
                  'left_data_value': left_data[3],
-                 'right_img_path': right_data[4],
+                 'right_img_path': current_path+ right_data[4],
                  'right_data_value': right_data[3],
-                 }
+                 'logo_img_path': current_path+'logo.png'}
     html_content = render_html_template(variables)
     save_rendered_html(html_content, str('./data/' + save_location + '/' + f'{save_location}.html'))
 
