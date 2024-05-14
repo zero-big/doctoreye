@@ -479,7 +479,7 @@ def main():
         st.sidebar.markdown('''
                     ### 업무선택
                     ''')
-        selection = st.sidebar.radio("업무선택",["메인화면","실시간 판독", "지난 데이터"], label_visibility="collapsed")
+        selection = st.sidebar.radio("업무선택",["메인화면","실시간 판독", "차트 조회"], label_visibility="collapsed")
         if selection == '메인화면':
             session_state["rerun"] = True
             # st.image("name_logo.jpg", use_column_width=True)
@@ -491,7 +491,7 @@ def main():
                 st.markdown("## Doctor Eye 메뉴 설명")
                 st.markdown("1. **메인화면** : 로그인 화면으로 돌아가기")
                 st.markdown("2. **실시간 판독** : 촬영한 사진을 업로드 하여 판독")
-                st.markdown("3. **지난 데이터** : 이전에 촬영한 데이터 확인")
+                st.markdown("3. **차트 조회** : 이전에 촬영한 데이터 확인")
 
             side_bg = 'bg.jpg'
         if selection == '실시간 판독':
@@ -506,7 +506,7 @@ def main():
             if len(uploaded_files) != 0 and len(uploaded_files)<=2:
                 save_location = save_uploaded_files(uploaded_files)
                 uploaded_file_detect(uploaded_files, save_location)
-        if selection == '지난 데이터':
+        if selection == '차트 조회':
             session_state["rerun"] = True
             if st.button('처음으로'):
                 session_state["logged_in"] = True
