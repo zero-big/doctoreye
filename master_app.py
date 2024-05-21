@@ -302,6 +302,7 @@ def classify_image(image, load_open= None):
     highest_value = max(prediction[0])
     predicted_class_index = np.argmax(prediction)
     predicted_class_name = class_names[predicted_class_index]
+    print(prediction)
     return predicted_class_name, highest_value, pred_papill
 
 def save_uploaded_files(uploaded_files):
